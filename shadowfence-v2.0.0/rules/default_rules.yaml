@@ -1,0 +1,147 @@
+# ShadowFence Custom Detection Rules
+# ====================================
+# Define custom signature-based rules for pattern matching in packet payloads.
+#
+# Rule format:
+#   - name: Human-readable rule name
+#     description: What this rule detects
+#     severity: critical | high | medium | low | info
+#     protocol: tcp | udp | icmp | any
+#     src_port: port number or null (any)
+#     dst_port: port number or null (any)
+#     pattern: regex pattern to match in payload (case-insensitive)
+#     action: alert | log | block (block requires iptables integration)
+#     enabled: true | false
+
+rules:
+  # === Web Attack Signatures ===
+  - name: "SQL Injection Attempt"
+    description: "Detects common SQL injection patterns in HTTP traffic"
+    severity: critical
+    protocol: tcp
+    dst_port: null
+    pattern: "(?i)(union\\s+select|or\\s+1\\s*=\\s*1|'\\s*or\\s*'|drop\\s+table|insert\\s+into|delete\\s+from|update\\s+.*set|exec\\s*\\(|execute\\s*\\(|xp_cmdshell)"
+    action: alert
+    enabled: true
+
+  - name: "XSS Attack Attempt"
+    description: "Detects cross-site scripting patterns"
+    severity: high
+    protocol: tcp
+    dst_port: null
+    pattern: "(?i)(<script[^>]*>|javascript\\s*:|on(error|load|click|mouseover)\\s*=|<iframe|<embed|<object\\s)"
+    action: alert
+    enabled: true
+
+  - name: "Directory Traversal"
+    description: "Detects path traversal attempts"
+    severity: high
+    protocol: tcp
+    dst_port: null
+    pattern: "(\\.\\./|\\.\\.\\\\|%2e%2e%2f|%2e%2e/|\\.\\.%2f|%252e%252e)"
+    action: alert
+    enabled: true
+
+  - name: "Command Injection"
+    description: "Detects OS command injection attempts"
+    severity: critical
+    protocol: tcp
+    dst_port: null
+    pattern: "(?i)(;\\s*(ls|cat|wget|curl|bash|sh|python|perl|ruby|nc|netcat)\\s|\\|\\s*(ls|cat|wget|curl|bash)|`[^`]*`|\\$\\(.*\\))"
+    action: alert
+    enabled: true
+
+  # === Reconnaissance Signatures ===
+  - name: "Nmap Scan Detection"
+    description: "Detects Nmap scan fingerprints in packets"
+    severity: medium
+    protocol: tcp
+    dst_port: null
+    pattern: "(?i)(nmap|masscan)"
+    action: alert
+    enabled: true
+
+  - name: "Nikto Scanner"
+    description: "Detects Nikto web vulnerability scanner"
+    severity: medium
+    protocol: tcp
+    dst_port: null
+    pattern: "(?i)(nikto|tuning:\\s*[0-9])"
+    action: alert
+    enabled: true
+
+  # === Malware Indicators ===
+  - name: "Reverse Shell Attempt"
+    description: "Detects common reverse shell patterns"
+    severity: critical
+    protocol: tcp
+    dst_port: null
+    pattern: "(?i)(/bin/(ba)?sh\\s+-i|nc\\s+-e|python.*socket.*connect|bash.*>&.*/dev/tcp|powershell.*-e\\s+[A-Za-z0-9+/=]+)"
+    action: alert
+    enabled: true
+
+  - name: "Suspicious PowerShell"
+    description: "Detects obfuscated or malicious PowerShell commands"
+    severity: high
+    protocol: tcp
+    dst_port: null
+    pattern: "(?i)(powershell.*(-enc|-encodedcommand|-e\\s+[A-Za-z0-9+/=]{20,})|invoke-(expression|webrequest|shellcode)|downloadstring|downloadfile|iex\\s*\\()"
+    action: alert
+    enabled: true
+
+  - name: "Cryptocurrency Miner"
+    description: "Detects crypto mining communication patterns"
+    severity: high
+    protocol: tcp
+    dst_port: null
+    pattern: "(?i)(stratum\\+tcp|mining\\.pool|xmrig|cryptonight|ethash|\"method\":\\s*\"mining)"
+    action: alert
+    enabled: true
+
+  # === Data Exfiltration ===
+  - name: "Base64 Encoded Payload"
+    description: "Detects large Base64 encoded data transfers that may indicate exfiltration"
+    severity: medium
+    protocol: tcp
+    dst_port: null
+    pattern: "[A-Za-z0-9+/]{100,}={0,2}"
+    action: alert
+    enabled: true
+
+  # === Protocol Anomalies ===
+  - name: "HTTP CONNECT Tunnel"
+    description: "Detects HTTP CONNECT method used for tunneling"
+    severity: medium
+    protocol: tcp
+    dst_port: null
+    pattern: "(?i)CONNECT\\s+[\\w.-]+:\\d+\\s+HTTP/"
+    action: alert
+    enabled: true
+
+  - name: "Suspicious User-Agent"
+    description: "Detects suspicious or known malicious user agents"
+    severity: low
+    protocol: tcp
+    dst_port: null
+    pattern: "(?i)User-Agent:\\s*(python-requests|curl/|wget/|sqlmap|hydra|dirbuster|gobuster|burpsuite)"
+    action: alert
+    enabled: true
+
+  # === Authentication ===
+  - name: "Cleartext Credentials"
+    description: "Detects potential cleartext password transmission"
+    severity: high
+    protocol: tcp
+    dst_port: null
+    pattern: "(?i)(password|passwd|pwd)\\s*[=:]\\s*[^\\s&]{3,}"
+    action: alert
+    enabled: true
+
+  - name: "FTP Cleartext Login"
+    description: "Detects FTP login credentials in cleartext"
+    severity: high
+    protocol: tcp
+    dst_port: 21
+    pattern: "(?i)(USER|PASS)\\s+.+"
+    action: alert
+    enabled: true

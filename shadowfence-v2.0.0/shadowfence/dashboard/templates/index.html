@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShadowFence - Network IDS Dashboard</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <span class="logo-icon">&#x1f6e1;</span>
+            <h1>ShadowFence</h1>
+            <span class="badge">IDS</span>
+        </div>
+        <div class="nav-status">
+            <span id="connection-status" class="status-dot disconnected"></span>
+            <span id="connection-text">Connecting...</span>
+        </div>
+    </nav>
+
+    <main class="container">
+        <!-- Stats Cards -->
+        <section class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon packets-icon">&#x1f4e6;</div>
+                <div class="stat-info">
+                    <span class="stat-value" id="packets-captured">0</span>
+                    <span class="stat-label">Packets Captured</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon alerts-icon">&#x26a0;</div>
+                <div class="stat-info">
+                    <span class="stat-value" id="total-alerts">0</span>
+                    <span class="stat-label">Total Alerts</span>
+                </div>
+            </div>
+            <div class="stat-card critical">
+                <div class="stat-icon critical-icon">&#x1f6a8;</div>
+                <div class="stat-info">
+                    <span class="stat-value" id="critical-alerts">0</span>
+                    <span class="stat-label">Critical</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon pps-icon">&#x26a1;</div>
+                <div class="stat-info">
+                    <span class="stat-value" id="pps">0</span>
+                    <span class="stat-label">Packets/sec</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon bytes-icon">&#x1f4ca;</div>
+                <div class="stat-info">
+                    <span class="stat-value" id="bytes-captured">0 B</span>
+                    <span class="stat-label">Data Captured</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon uptime-icon">&#x23f1;</div>
+                <div class="stat-info">
+                    <span class="stat-value" id="uptime">0s</span>
+                    <span class="stat-label">Uptime</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Charts Row -->
+        <section class="charts-grid">
+            <div class="chart-card">
+                <h3>Protocol Distribution</h3>
+                <canvas id="protocol-chart"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3>Alerts by Severity</h3>
+                <canvas id="severity-chart"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3>Alerts by Type</h3>
+                <canvas id="type-chart"></canvas>
+            </div>
+        </section>
+
+        <!-- Alert Feed -->
+        <section class="alert-section">
+            <div class="section-header">
+                <h2>Live Alert Feed</h2>
+                <div class="filter-controls">
+                    <select id="severity-filter">
+                        <option value="all">All Severities</option>
+                        <option value="critical">Critical</option>
+                        <option value="high">High</option>
+                        <option value="medium">Medium</option>
+                        <option value="low">Low</option>
+                    </select>
+                    <button id="clear-alerts" class="btn btn-outline">Clear</button>
+                </div>
+            </div>
+            <div id="alert-feed" class="alert-feed">
+                <div class="empty-state">
+                    <span>&#x1f6e1;</span>
+                    <p>Monitoring network traffic... Alerts will appear here.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="/static/js/dashboard.js"></script>
+</body>
+</html>

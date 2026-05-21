@@ -1,0 +1,167 @@
+# ShadowFence Configuration
+# =========================
+
+# Network interface to monitor (use 'any' to capture on all interfaces)
+# Linux:   eth0, wlan0, ens33, etc. Use `shadowfence list-interfaces` to see available
+# Windows: Use adapter name from `shadowfence list-interfaces`
+interface: "any"
+
+# Capture settings
+capture:
+  promiscuous: true
+  snap_length: 65535
+  buffer_size: 2097152      # 2MB
+  filter: ""                # BPF filter (e.g., "tcp port 80" or "not arp")
+  # PCAP forensic export
+  pcap_export: false
+  pcap_dir: "captures"
+  pcap_max_size: 104857600  # 100MB per file
+  pcap_max_files: 10        # Max rotated files to keep
+
+# Detection engine settings
+detection:
+  enabled: true
+  min_severity: low         # Minimum severity to report: critical, high, medium, low, info
+
+  # --- Core Detectors ---
+
+  port_scan:
+    enabled: true
+    threshold: 15            # Ports scanned before triggering alert
+    time_window: 60          # Seconds
+    severity: high
+
+  brute_force:
+    enabled: true
+    threshold: 10            # Failed attempts before alert
+    time_window: 120
+    monitored_ports: [22, 23, 3389, 5900, 21, 3306, 5432, 1433, 27017]
+    severity: high
+
+  ddos:
+    enabled: true
+    syn_flood_threshold: 500
+    udp_flood_threshold: 1000
+    icmp_flood_threshold: 200
+    http_flood_threshold: 300
+    time_window: 10
+    severity: critical
+
+  arp_spoof:
+    enabled: true
+    severity: critical
+
+  dns_tunnel:
+    enabled: true
+    query_length_threshold: 50
+    query_rate_threshold: 100
+    entropy_threshold: 3.5
+    severity: high
+
+  payload:
+    enabled: true
+    max_payload_size: 8192
+    severity: medium
+
+  # --- Advanced Detectors ---
+
+  # Protocol anomaly detection (XMAS scan, NULL scan, LAND attack, Smurf, TTL anomaly)
+  protocol_anomaly:
+    enabled: true
+    severity: medium
+    detect_xmas_scan: true
+    detect_null_scan: true
+    detect_land_attack: true
+    detect_smurf_attack: true
+    detect_ttl_anomaly: true
+    ttl_anomaly_threshold: 3
+    time_window: 60
+
+  # Bandwidth anomaly & data exfiltration detection
+  bandwidth_anomaly:
+    enabled: true
+    severity: high
+    baseline_window: 300       # Seconds to build baseline
+    spike_multiplier: 5.0      # Alert if traffic exceeds 5x baseline
+    exfil_threshold_bytes: 104857600   # 100MB outbound = exfiltration alert
+    exfil_time_window: 300
+    connection_burst_threshold: 100
+    connection_burst_window: 10
+
+  # SSL/TLS anomaly detection (downgrade, SSL stripping, weak ciphers)
+  ssl_anomaly:
+    enabled: true
+
+  # Threat intelligence feed integration
+  threat_intel:
+    enabled: true
+    blocklist_path: ""         # Path to malicious IP/domain list (JSON or text)
+    auto_update: false
+
+  # Automated firewall response (iptables on Linux, netsh on Windows)
+  firewall:
+    enabled: false
+    auto_block: false
+    block_duration: 3600       # Auto-unblock after 1 hour
+    whitelist:
+      - "127.0.0.1"
+      - "::1"
+    min_severity_to_block: high
+    max_blocks: 1000
+    log_file: "firewall_actions.log"
+    dry_run: true              # Set to false for actual blocking (CAUTION!)
+
+  # Passive network topology mapping
+  network_map:
+    enabled: true
+
+# Alert settings
+alerts:
+  console:
+    enabled: true
+    colors: true
+
+  # Email alerts
+  email:
+    enabled: false
+    smtp_server: "smtp.gmail.com"
+    smtp_port: 587
+    use_tls: true
+    username: ""
+    password: ""               # Use Gmail App Password, NOT regular password
+    from_addr: ""
+    to_addrs: []
+    min_interval: 300
+    batch_interval: 60
+    include_packet_dump: true
+
+  # Webhook alerts (Slack, Discord, Teams, etc.)
+  webhook:
+    enabled: false
+    url: ""
+    method: "POST"
+    headers:
+      Content-Type: "application/json"
+
+# Dashboard settings
+dashboard:
+  enabled: true
+  host: "0.0.0.0"
+  port: 8443
+  max_events: 10000
+  update_interval: 1000
+
+# Logging settings
+logging:
+  level: "INFO"
+  file: "shadowfence.log"
+  max_size: 52428800
+  backup_count: 5
+  log_packets: false
+
+# Performance settings
+performance:
+  worker_threads: 4
+  packet_queue_size: 10000
+  batch_processing: true
+  batch_size: 100

@@ -1,0 +1,65 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "shadowfence"
+version = "2.0.0"
+description = "ShadowFence - Advanced Network Intrusion Detection System with real-time monitoring, threat detection, and email alerts"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+authors = [
+    {name = "Sudeep Patil", email = "sudeep@shadowfence.dev"}
+]
+keywords = ["ids", "intrusion-detection", "network-security", "packet-analysis", "cybersecurity"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: System Administrators",
+    "Intended Audience :: Information Technology",
+    "Topic :: Security",
+    "Topic :: System :: Networking :: Monitoring",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "scapy>=2.5.0",
+    "flask>=3.0.0",
+    "flask-socketio>=5.3.0",
+    "pyyaml>=6.0",
+    "rich>=13.0.0",
+    "click>=8.1.0",
+    "python-dotenv>=1.0.0",
+    "gevent>=23.0.0",
+    "gevent-websocket>=0.10.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "ruff>=0.1.0",
+]
+
+[project.scripts]
+shadowfence = "shadowfence.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["shadowfence*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+
+[tool.ruff.lint.per-file-ignores]
+"shadowfence/alerts/email_alert.py" = ["E501"]
+"shadowfence/cli.py" = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

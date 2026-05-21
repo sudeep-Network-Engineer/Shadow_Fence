@@ -1,0 +1,15 @@
+{
+    "description": "Example threat intelligence blocklist for ShadowFence",
+    "source": "custom",
+    "last_updated": "2025-01-01",
+    "ips": [
+        "198.51.100.1",
+        "203.0.113.50",
+        "192.0.2.100"
+    ],
+    "domains": [
+        "malware-c2.example.com",
+        "phishing-kit.example.net",
+        "cryptominer-pool.example.org"
+    ]
+}
